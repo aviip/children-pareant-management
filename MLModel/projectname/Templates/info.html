@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health and Screen Time Survey</title>
+</head>
+<body>
+    <h2>Health and Screen Time Survey</h2>
+    <form action="#" method="post">
+        {% csrf_token %}
+        <!-- Age -->
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" min="1" required>
+        <br><br>
+
+        <!-- Average Time Spent for Sleeping -->
+        <label for="sleep_time">Average Time Spent for Sleeping (in hours):</label>
+        <input type="number" id="sleep_time" name="sleep_time" min="0" step="0.1" required>
+        <br><br>
+
+        <!-- Average Time Spent with Family -->
+        <label for="family_time">Average Time Spent with Family (in hours):</label>
+        <input type="number" id="family_time" name="family_time" min="0" step="0.1" required>
+        <br><br>
+
+        <!-- Average Time Spent in Social Interaction -->
+        <label for="social_time">Average Time Spent in Social Interaction (in hours):</label>
+        <input type="number" id="social_time" name="social_time" min="0" step="0.1" required>
+        <br><br>
+
+        <!-- Average Current Screen Time -->
+        <label for="screen_time">Average Current Screen Time (in hours):</label>
+        <input type="number" id="screen_time" name="screen_time" min="0" step="0.1" required>
+        <br><br>
+
+        <!-- Study Habits -->
+        <label for="study_habits">Study Habits:</label>
+        <select id="study_habits" name="study_habits" required>
+            <option value="good">Good</option>
+            <option value="average">Average</option>
+            <option value="poor">Poor</option>
+        </select>
+        <br><br>
+
+        <!-- Emotional State -->
+        <label for="emotional_state">Emotional State:</label>
+        <select id="emotional_state" name="emotional_state" required>
+            <option value="good">Good</option>
+            <option value="average">Average</option>
+            <option value="poor">Poor</option>
+        </select>
+        <br><br>
+
+        <!-- History of Headache -->
+        <label for="headache_history">History of Headache:</label>
+        <select id="headache_history" name="headache_history" required>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+        </select>
+        <br><br>
+
+        <!-- History of Eye Problems -->
+        <label for="eye_problems_history">History of Eye Problems:</label>
+        <select id="eye_problems_history" name="eye_problems_history" required>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+        </select>
+        <br><br>
+
+        <!-- Submit Button -->
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
