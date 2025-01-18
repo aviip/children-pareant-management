@@ -1,29 +1,45 @@
 import { RiEditBoxLine } from "react-icons/ri";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import parentImage from "../../../assets/Images/profile.jpg";
 import IconBtn from "../../Common/IconBtn";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { addChildUnderMe } from "../../../services/oparations/InterestFormAPI";
 
 export default function ParentProfile() {
   const { user } = useSelector((state) => state.profile);
   const [children, setChildren] = useState(user?.children || []);
   const [newChild, setNewChild] = useState({ name: "", age: "" });
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleAddChild = () => {
     if (newChild.name && newChild.age) {
-      const updatedChildren = [...children, newChild];
-      setChildren(updatedChildren);
+      // Prepare the child data for the Redux action
+      const childData = {
+        firstName: newChild.name,
+        lastName: user?.lastName,
+        age: newChild.age,
+        platform: "web",
+      };
+
+      // Dispatch the Redux action
+      dispatch(addChildUnderMe(childData, navigate));
+
+      // Clear the input fields after dispatch
       setNewChild({ name: "", age: "" });
-      // TODO: Add API call to save child in database
-      navigate("/dashboard/interest-form");
+    } else {
+      alert("Please fill in both name and age before saving.");
     }
   };
 
+  useEffect(() => {}, []);
+
   return (
     <>
-      <h1 className="mb-3 text-3xl font-medium text-black">Hello, Super Parent! 👋</h1>
+      <h1 className="mb-3 text-3xl font-medium text-black">
+        Hello, Super Parent! 👋
+      </h1>
       {/* Parent Info Box */}
       <div className="flex items-center justify-between rounded-md border-[1px] border-richblue-500 bg-llblue py-3 px-8">
         <div className="flex items-center gap-x-4">
@@ -33,10 +49,16 @@ export default function ParentProfile() {
             className="aspect-square w-[68px] rounded-full object-cover"
           />
           <div className="space-y-1">
-            <p className="text-2xl font-semibold text-ddblue">{user?.firstName || "Parent Name"}</p>
+            <p className="text-2xl font-semibold text-ddblue">
+              {user?.firstName || "Parent Name"}
+            </p>
             <div className="flex gap-x-5 justify-center items-center">
-            <p className="text-md text-richblue-800">{user?.email || "parent@example.com"}</p>
-            <p className="text-md text-richblue-800">{user?.phone || "+91 1234567890"}</p>
+              <p className="text-md text-richblue-800">
+                {user?.email || "parent@example.com"}
+              </p>
+              <p className="text-md text-richblue-800">
+                {user?.phone || "+91 1234567890"}
+              </p>
             </div>
           </div>
         </div>
@@ -53,7 +75,9 @@ export default function ParentProfile() {
       {/* Children Info Box */}
       <div className="mt-4 mb-1 rounded-md border-[1px] border-richblue-500 bg-llblue p-3 px-8">
         <div className="flex w-full items-center justify-between">
-          <p className="text-lg font-semibold text-richblue-900">Registered Children</p>
+          <p className="text-lg font-semibold text-richblue-900">
+            Registered Children
+          </p>
         </div>
         <div className="mt-2 flex flex-wrap gap-2">
           {children.length > 0 ? (
@@ -66,7 +90,9 @@ export default function ParentProfile() {
               </div>
             ))
           ) : (
-            <p className="text-sm text-richblue-800">No children registered yet. Let's add one!</p>
+            <p className="text-sm text-richblue-800">
+              No children registered yet. Let's add one!
+            </p>
           )}
         </div>
       </div>
@@ -78,20 +104,26 @@ export default function ParentProfile() {
         </div>
         <div className="flex flex-col gap-y-4">
           <div className="flex flex-row gap-x-6 items-center justify-center">
-          <input
-            type="text"
-            placeholder="Child's Name"
-            value={newChild.name}
-            onChange={(e) => setNewChild({ ...newChild, name: e.target.value })}
-            className="rounded-md w-full border-[1px] border-richblue-300 p-2"
-          />
-          <input
-            type="number"
-            placeholder="Child's Age"
-            value={newChild.age}
-            onChange={(e) => setNewChild({ ...newChild, age: e.target.value })}
-            className="rounded-md w-full border-[1px] border-richblue-300 p-2"
-          />
+            <input
+              type="text"
+              placeholder="Child's Name"
+              value={newChild.name}
+              required
+              onChange={(e) =>
+                setNewChild({ ...newChild, name: e.target.value })
+              }
+              className="rounded-md w-full border-[1px] border-richblue-300 p-2"
+            />
+            <input
+              type="number"
+              placeholder="Child's Age"
+              value={newChild.age}
+              required
+              onChange={(e) =>
+                setNewChild({ ...newChild, age: e.target.value })
+              }
+              className="rounded-md w-full border-[1px] border-richblue-300 p-2"
+            />
           </div>
           <IconBtn
             text="Save Child"

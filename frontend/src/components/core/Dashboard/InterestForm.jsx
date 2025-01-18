@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import {fetchChildrenInterestData} from "../../../services/oparations/InterestFormAPI"
-import { useDispatch } from "react-redux";
+import { fetchChildrenInterestData } from "../../../services/oparations/InterestFormAPI";
+import { useDispatch, useSelector } from "react-redux";
 
 function InterestForm() {
   // State for child selection and form data
-  const dispatch = useDispatch()
-  const [selectedChild, setSelectedChild] = useState("Aryan");
+  const dispatch = useDispatch();
+  const { children } = useSelector((state) => state.profile);
+  const [selectedChild, setSelectedChild] = useState(
+    children.length > 0 ? children[0].firstName : ""
+  );
   const [formData, setFormData] = useState({
     personalityTraits: "",
     hobbies: "",
@@ -17,35 +20,43 @@ function InterestForm() {
     favoriteSubjects: "",
     schoolTimings: "",
     examDates: "",
+    childrenId: "",
   });
 
   // Mock database with pre-filled data for one child
-  const childDatabase = {
-    Aryan: {
-      personalityTraits: "Curious, Creative",
-      hobbies: "Reading, Drawing",
-      likes: "Music, Puzzles",
-      dislikes: "Loud noises",
-      strengths: "Problem-solving, Creativity",
-      weaknesses: "Impatience",
-      freeTimeActivities: "Playing video games, Painting",
-      favoriteSubjects: "Math, Science",
-      schoolTimings: "9 AM - 3 PM",
-      examDates: "March 1 - March 10",
-    },
-    Anika: {
-      personalityTraits: "",
-      hobbies: "",
-      likes: "",
-      dislikes: "",
-      strengths: "",
-      weaknesses: "",
-      freeTimeActivities: "",
-      favoriteSubjects: "",
-      schoolTimings: "",
-      examDates: "",
-    },
-  };
+  // const childDatabase = {
+  //   Aryan: {
+  //     personalityTraits: "Curious, Creative",
+  //     hobbies: "Reading, Drawing",
+  //     likes: "Music, Puzzles",
+  //     dislikes: "Loud noises",
+  //     strengths: "Problem-solving, Creativity",
+  //     weaknesses: "Impatience",
+  //     freeTimeActivities: "Playing video games, Painting",
+  //     favoriteSubjects: "Math, Science",
+  //     schoolTimings: "9 AM - 3 PM",
+  //     examDates: "March 1 - March 10",
+  //   },
+  //   Anika: {
+  //     personalityTraits: "",
+  //     hobbies: "",
+  //     likes: "",
+  //     dislikes: "",
+  //     strengths: "",
+  //     weaknesses: "",
+  //     freeTimeActivities: "",
+  //     favoriteSubjects: "",
+  //     schoolTimings: "",
+  //     examDates: "",
+  //   },
+  // };
+
+  const childDatabase = children.reduce((acc, child) => {
+    acc[child.firstName] = { ...formData, childrenId: child._id };
+    return acc;
+  }, {});
+
+  console.log("formData:", formData);
 
   // Load existing data when the selected child changes
   useEffect(() => {
@@ -59,14 +70,12 @@ function InterestForm() {
   };
 
   // Handler for saving form data
-  const handleSave =async(e) => {
-    e.preventDefault()
+  const handleSave = async (e) => {
+    e.preventDefault();
     console.log("Saved Data:", formData);
     dispatch(fetchChildrenInterestData(formData));
     alert("Form data has been saved successfully!");
   };
-
-  
 
   return (
     <div className="p-5 rounded-lg shadow-lg w-full max-w-3xl mx-auto mt-4">
@@ -80,8 +89,11 @@ function InterestForm() {
           value={selectedChild}
           onChange={(e) => setSelectedChild(e.target.value)}
         >
-          <option value="Aryan">Aryan</option>
-          <option value="Anika">Anika</option>
+          {children.map((child) => (
+            <option key={child._id} value={child.firstName}>
+              {child.firstName} {child.lastName}
+            </option>
+          ))}
         </select>
       </div>
 
