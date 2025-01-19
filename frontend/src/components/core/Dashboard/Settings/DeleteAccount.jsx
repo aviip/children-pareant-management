@@ -1,6 +1,8 @@
 import { FiTrash2 } from "react-icons/fi"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
+import { deleteProfile } from "../../../../services/oparations/profileAPI"
+import Cookies from "js-cookie"
 
 // import { deleteProfile } from "../../../../services/operations/SettingsAPI"
 
@@ -11,7 +13,10 @@ export default function DeleteAccount() {
 
   async function handleDeleteAccount() {
     try {
-    //   dispatch(deleteProfile(token, navigate))
+      if (Cookies.get("token")) {
+        const token = Cookies.get("token");
+        dispatch(deleteProfile(token, navigate))
+      }
     } catch (error) {
       console.log("ERROR MESSAGE - ", error.message)
     }

@@ -4,11 +4,15 @@ import { useDispatch, useSelector } from "react-redux"
 import iam from "../../../../assets/Images/profile.jpg"
 // import { updateDisplayPicture } from "../../../../services/operations/SettingsAPI"
 import IconBtn from "../../../Common/IconBtn"
+import { useNavigate } from "react-router-dom";
+import { updateUserProfileImage } from "../../../../services/oparations/profileAPI";
+import Cookies from "js-cookie";
 
 export default function ChangeProfilePicture() {
   const { token } = useSelector((state) => state.auth)
   const { user } = useSelector((state) => state.profile)
   const dispatch = useDispatch()
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false)
   const [imageFile, setImageFile] = useState(null)
@@ -41,12 +45,14 @@ export default function ChangeProfilePicture() {
     try {
       console.log("uploading...")
       setLoading(true)
-      const formData = new FormData()
-      formData.append("displayPicture", imageFile)
-      // console.log("formdata", formData)
-    //   dispatch(updateDisplayPicture(token, formData)).then(() => {
-    //     setLoading(false)
-    //   })
+      if (Cookies.get("token")) {
+        const token = Cookies.get("token");
+        dispatch(updateUserProfileImage(token, navigate, imageFile)).then(
+          () => {
+            setLoading(false);
+          }
+        );
+      }
     } catch (error) {
       console.log("ERROR MESSAGE - ", error.message)
     }
@@ -62,7 +68,7 @@ export default function ChangeProfilePicture() {
       <div className="flex items-center justify-between rounded-md border-[1px] border-richblue-500 bg-llblue p-3 px-8 text-richblue-900">
         <div className="flex items-center gap-x-4">
           <img
-            src={iam || user?.image}
+            src={previewSource ? previewSource : user?.image ? user?.image : iam}
             alt={`profile-${user?.firstName}`}
             className="aspect-square w-[78px] rounded-full object-cover"
           />

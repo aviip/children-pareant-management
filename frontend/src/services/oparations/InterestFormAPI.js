@@ -104,7 +104,7 @@ export function getAllChildren() {
         throw new Error(response.data.message);
       }
 
-      dispatch(getChildren(response.data.children));
+      dispatch(getChildren(response?.data?.data));
     } catch (error) {
       toast.error(
         error.message || "Failed to fetch children. Please try again."

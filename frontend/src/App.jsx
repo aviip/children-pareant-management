@@ -74,6 +74,14 @@ function App() {
             }
           />
           <Route
+            path="dashboard/interest-form/:childId"
+            element={
+              <PrivateRoute>
+                <InterestForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="dashboard/activities"
             element={
               <PrivateRoute>

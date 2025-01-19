@@ -259,6 +259,11 @@ exports.GetAllChildrenData = async (req, res) => {
         $project: {
           firstName: 1,
           lastName: 1,
+          accountType: 1,
+          active: 1,
+          platform: 1,
+          parentAccount: 1,
+          age: 1,
           childIntersetId: "$child_interset._id",
         },
       },
