@@ -10,8 +10,8 @@ import {
 } from "../../../services/oparations/InterestFormAPI";
 
 export default function ParentProfile() {
-  const { user } = useSelector((state) => state.profile);
-  const [children, setChildren] = useState(user?.children || []);
+  const { user, children: childrenData } = useSelector((state) => state.profile);
+  const [children, setChildren] = useState(childrenData || []);
   const [newChild, setNewChild] = useState({ name: "", age: "" });
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -36,9 +36,15 @@ export default function ParentProfile() {
     }
   };
 
-  useEffect(() => {
-    // dispatch(getAllChildren());
-  }, [user?.children]);
+  // useEffect(() => {
+  //   if (childrenData?.length === 0) {
+  //     dispatch(getAllChildren());
+  //   }
+  // }, [childrenData, dispatch]);
+
+  const viewInterest = (data) => {
+    navigate(`/dashboard/interest-form/${data._id}`);
+  };
 
   return (
     <>
@@ -87,11 +93,18 @@ export default function ParentProfile() {
         <div className="mt-2 flex flex-wrap gap-2">
           {children.length > 0 ? (
             children.map((child, index) => (
-              <div
-                key={index}
-                className="rounded-md bg-lightblue-500 p-2 px-4 text-sm text-ddblue"
-              >
-                {child.name}, Age: {child.age}
+              <div className="flex justify-between item-center w-full">
+                <div
+                  key={index}
+                  className="rounded-md bg-lightblue-500 p-2 px-4 text-sm text-ddblue"
+                >
+                  {child.firstName}, Age: {child.age}
+                </div>
+                <IconBtn
+                  text="View Interest"
+                  onclick={() => viewInterest(child)}
+                  className="text-center mx-auto w-40"
+                />
               </div>
             ))
           ) : (

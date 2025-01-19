@@ -9,6 +9,7 @@ exports.cloudinaryConnect = () => {
             api_key: CONFIG.KEYS.CLOUDINARY.API_KEY,
             api_secret: CONFIG.KEYS.CLOUDINARY.API_SECRET,
         });
+        return cloudinary;
     } catch (error) {
         console.log(error);
     }

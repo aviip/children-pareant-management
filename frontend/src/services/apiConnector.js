@@ -11,9 +11,22 @@ export const apiConnector = (method, url, bodyData, headers = {}, params) => {
   return axiosInstance({
       method: method,
       url: url,
-      data: bodyData ? bodyData : null,
+      ...(bodyData && { data: bodyData }),
       headers: {
           "Content-Type": "application/json",
+          ...headers
+      },
+      ...(params && { params: { ...params } })
+  });
+};
+
+export const apiConnectorFormData = (method, url, bodyData, headers = {}, params) => {
+  return axiosInstance({
+      method: method,
+      url: url,
+      data: bodyData ? bodyData : null,
+      headers: {
+          "Content-Type": "multipart/form-data",
           ...headers
       },
       params: params ? params : null,

@@ -4,15 +4,21 @@ const Joi = require('joi');
 const validateWith = require('../middleware/validation')
 
 const {
-    profile
+    profile,
+    updateProfilePicture,
+    deleteAccount
 } = require('../controllers/profile')
 
 endpoint = {
-    PROFILE: "/details"
+    PROFILE: "/details",
+    UPDATE_PROFILE_IMAGE: "/updateProfilePicture",
+    USER_DELETE_ACCOUNT: "/deleteAccount",
 }
 
 // Route for the fetching the profile
 router.get(endpoint.PROFILE, profile);
+router.post(endpoint.UPDATE_PROFILE_IMAGE, updateProfilePicture);
+router.post(endpoint.USER_DELETE_ACCOUNT, deleteAccount);
 
 
 // Export the router for use in the main application
