@@ -1,7 +1,12 @@
 import { toast } from "react-hot-toast";
 
 import { setLoading, setToken } from "../../slices/authSlice";
-import { addChild, setInterestData, setUser } from "../../slices/profileSlice";
+import {
+  addChild,
+  getChildren,
+  setInterestData,
+  setUser,
+} from "../../slices/profileSlice";
 import { apiConnector } from "../apiConnector";
 import { parentEndpoints } from "../api";
 import Cookies from "js-cookie";
@@ -11,6 +16,7 @@ const {
   GET_MOBILE_USAGE,
   FETCH_CHILDREN_INTEREST_DATA,
   INSERT_CHILDREN_INTEREST,
+  GET_ALL_CHILDREN_DATA,
 } = parentEndpoints;
 
 export function fetchChildrenInterestData(fromData) {
@@ -51,7 +57,6 @@ export function fetchChildrenInterestData(fromData) {
 }
 
 export function addChildUnderMe(childData, navigate) {
-  console.log("childData:", childData);
   return async (dispatch) => {
     const toastId = toast.loading("Adding child...");
     dispatch(setLoading(true));
@@ -81,6 +86,30 @@ export function addChildUnderMe(childData, navigate) {
       toast.error(error.message || "Failed to add child. Please try again.");
     } finally {
       // Dismiss the toast and update the loading state
+      toast.dismiss(toastId);
+      dispatch(setLoading(false));
+    }
+  };
+}
+
+export function getAllChildren() {
+  return async (dispatch) => {
+    const toastId = toast.loading("Loading children data...");
+    dispatch(setLoading(true));
+
+    try {
+      const response = await apiConnector("GET", GET_ALL_CHILDREN_DATA);
+
+      if (!response.data.success) {
+        throw new Error(response.data.message);
+      }
+
+      dispatch(getChildren(response.data.children));
+    } catch (error) {
+      toast.error(
+        error.message || "Failed to fetch children. Please try again."
+      );
+    } finally {
       toast.dismiss(toastId);
       dispatch(setLoading(false));
     }

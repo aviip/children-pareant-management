@@ -23,10 +23,13 @@ const profileSlice = createSlice({
     setInterestData: (state, action) => {
       state.interestData = action.payload;
     },
+    getChildren(state, action) {
+      state.children = action.payload;
+    },
   },
 });
 
-export const { setUser, setLoading, addChild, setInterestData } =
+export const { setUser, setLoading, addChild, setInterestData, getChildren } =
   profileSlice.actions;
 
 export default profileSlice.reducer;

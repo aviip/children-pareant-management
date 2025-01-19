@@ -3,8 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import parentImage from "../../../assets/Images/profile.jpg";
 import IconBtn from "../../Common/IconBtn";
-import { useEffect, useState } from "react";
-import { addChildUnderMe } from "../../../services/oparations/InterestFormAPI";
+import { useCallback, useEffect, useState } from "react";
+import {
+  addChildUnderMe,
+  getAllChildren,
+} from "../../../services/oparations/InterestFormAPI";
 
 export default function ParentProfile() {
   const { user } = useSelector((state) => state.profile);
@@ -33,7 +36,9 @@ export default function ParentProfile() {
     }
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    // dispatch(getAllChildren());
+  }, [user?.children]);
 
   return (
     <>

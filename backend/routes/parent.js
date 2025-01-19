@@ -90,6 +90,7 @@ url : localhost:4000/api/v1/parent/child/get/interest?childrenId=672df6b26045c53
  */
 router.get(endpoints.GET_CHILD_INTEREST, isParent, GetInterestDataForChild);
 
+// url : localhost:4000/api/v1/parent/child/get/children
 router.get(endpoints.GET_CHILDREN, isParent, GetAllChildrenData);
 
 /*
