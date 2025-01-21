@@ -4,7 +4,7 @@ const initialState = {
   user: null,
   children: [],
   loading: false,
-  interestData: null,
+  interestData: [],
 };
 
 const profileSlice = createSlice({
@@ -21,7 +21,15 @@ const profileSlice = createSlice({
       state.children.push(action.payload);
     },
     setInterestData: (state, action) => {
-      state.interestData = action.payload;
+      const existingIndex = state.interestData.findIndex(
+        (user) => user.childId === action.payload.childId
+      );
+
+      if (existingIndex !== -1) {
+        state.interestData[existingIndex] = action.payload;
+      } else {
+        state.interestData.push(action.payload);
+      }
     },
     getChildren(state, action) {
       state.children = action.payload;

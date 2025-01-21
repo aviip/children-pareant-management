@@ -130,6 +130,7 @@ exports.UpdateOrCreateInterest = async (req, res) => {
       parentAccount: parentId,
       accountType: CONFIG.ACCOUNT_TYPE.CHILD,
     });
+
     if (!child) {
       return res
         .status(403)
@@ -138,12 +139,8 @@ exports.UpdateOrCreateInterest = async (req, res) => {
         );
     }
 
-    console.log(child);
-
     // Check if an interest document exists for this child
     let interest = await Interest.findOne({ userId: childrenId });
-
-    console.log("interest", interest);
 
     if (interest) {
       // Update existing interest with only provided fields in `interestData`
@@ -155,7 +152,11 @@ exports.UpdateOrCreateInterest = async (req, res) => {
       await interest.save();
     } else {
       // Create new interest document if none exists
-      interest = new Interest({ ...interestData, userId: childrenId });
+      interest = new Interest({
+        ...interestData,
+        userId: childrenId,
+        parentAccount: parentId,
+      });
       await interest.save();
     }
 
@@ -285,6 +286,194 @@ exports.GetAllChildrenData = async (req, res) => {
           error.message
         )
       );
+  }
+};
+
+exports.GetUsageReport = async (req, res) => {
+  try {
+    const { reportType, childId, startDate, endDate } = req.query;
+    const parentId = req.user.id;
+
+    const child = await User.findOne({
+      _id: childId,
+      parentAccount: parentId,
+      accountType: "Child",
+    });
+
+    if (!child) {
+      return res
+        .status(404)
+        .json(errorFunction(false, "Child not found or not authorized"));
+    }
+
+    let matchQuery = { userId: childId };
+    let pipeline = [];
+
+    if (startDate && endDate) {
+      matchQuery.createdAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    pipeline.push({ $match: matchQuery });
+
+    switch (reportType) {
+      case "daily":
+        pipeline.push({
+          $project: {
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            weeklyUsage: 1,
+            coinsGenerated: 1,
+          },
+        });
+        break;
+
+      case "weekly":
+        pipeline.push({
+          $group: {
+            _id: {
+              week: { $week: "$createdAt" },
+              year: { $year: "$createdAt" },
+            },
+            totalUsage: { $sum: { $sum: "$weeklyUsage" } },
+            avgCoins: { $avg: "$coinsGenerated" },
+          },
+        });
+        break;
+
+      case "monthly":
+        pipeline.push({
+          $group: {
+            _id: {
+              month: { $month: "$createdAt" },
+              year: { $year: "$createdAt" },
+            },
+            totalUsage: { $sum: { $sum: "$weeklyUsage" } },
+            avgCoins: { $avg: "$coinsGenerated" },
+          },
+        });
+        break;
+
+      case "yearly":
+        pipeline.push({
+          $group: {
+            _id: { year: { $year: "$createdAt" } },
+            totalUsage: { $sum: { $sum: "$weeklyUsage" } },
+            avgCoins: { $avg: "$coinsGenerated" },
+          },
+        });
+        break;
+
+      default:
+        return res
+          .status(400)
+          .json(errorFunction(false, "Invalid report type"));
+    }
+
+    const usageData = await MobileUsage.aggregate(pipeline);
+
+    return res.status(200).json({
+      success: true,
+      message: `${reportType} report retrieved successfully`,
+      data: usageData,
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json(
+        errorFunction(false, "Error retrieving usage report", error.message)
+      );
+  }
+};
+
+// the option to edit the continuous usage limit has not been implemented.
+exports.UpdateContinuousUsageLimit = async (req, res) => {
+  try {
+    const { childId, limit } = req.body;
+    console.log("req.body:", req.body);
+    const parentId = req.user.id;
+
+    const limitRegex = /^\d+\s+(minutes?|hours?)$/;
+    if (!limitRegex.test(limit)) {
+      return res
+        .status(400)
+        .json(
+          errorFunction(
+            false,
+            "Invalid limit format. Use format like '60 minutes' or '2 hours'"
+          )
+        );
+    }
+
+    const child = await User.findOne({
+      _id: childId,
+      parentAccount: parentId,
+      accountType: "Child",
+    });
+
+    if (!child) {
+      return res
+        .status(404)
+        .json(errorFunction(false, "Child not found or not authorized"));
+    }
+
+    const updatedUsage = await MobileUsage.findOneAndUpdate(
+      { userId: childId },
+      { continuousUsageLimit: limit },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Continuous usage limit updated successfully",
+      data: updatedUsage,
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json(
+        errorFunction(
+          false,
+          "Error updating continuous usage limit",
+          error.message
+        )
+      );
+  }
+};
+
+// report and insights data is currently hardcoded. (to replace hardcoded data)
+exports.RecordUsageData = async (req, res) => {
+  try {
+    const { userId, dailyUsage, coins } = req.body;
+    console.log("req.body:", req.body);
+
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+
+    let usageRecord = await MobileUsage.findOne({ userId });
+
+    if (!usageRecord) {
+      usageRecord = new MobileUsage({ userId });
+    }
+
+    usageRecord.weeklyUsage[dayOfWeek] = dailyUsage;
+    usageRecord.coinsGenerated += coins || 0;
+
+    await usageRecord.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Usage data recorded successfully",
+      data: usageRecord,
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json(errorFunction(false, "Error recording usage data", error.message));
   }
 };
 

@@ -5,7 +5,11 @@ import { apiConnector, apiConnectorFormData } from "../apiConnector";
 import { profileEndpoints } from "../api";
 import { logout } from "./authAPI";
 
-const { GET_USER_DETAILS_API, UPDATE_USER_PROFILE_IMAGE_API, USER_DELETE_ACCOUNT_API } = profileEndpoints;
+const {
+  GET_USER_DETAILS_API,
+  UPDATE_USER_PROFILE_IMAGE_API,
+  USER_DELETE_ACCOUNT_API,
+} = profileEndpoints;
 
 export function getUserDetails(token, navigate) {
   return async (dispatch) => {
@@ -58,7 +62,7 @@ export function updateUserProfileImage(token, navigate, imageFile) {
   };
 }
 
-export function deleteProfile(token, navigate) {
+export function deleteProfile(navigate) {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...");
     dispatch(setLoading(true));

@@ -1,15 +1,13 @@
 import { toast } from "react-hot-toast";
 
-import { setLoading, setToken } from "../../slices/authSlice";
+import { setLoading } from "../../slices/authSlice";
 import {
   addChild,
   getChildren,
   setInterestData,
-  setUser,
 } from "../../slices/profileSlice";
 import { apiConnector } from "../apiConnector";
 import { parentEndpoints } from "../api";
-import Cookies from "js-cookie";
 
 const {
   ADD_CHILD_UNDER_ME,
@@ -19,7 +17,7 @@ const {
   GET_ALL_CHILDREN_DATA,
 } = parentEndpoints;
 
-export function fetchChildrenInterestData(fromData) {
+export function fetchChildrenInterestData(fromData, childrenId) {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...");
     dispatch(setLoading(true));
@@ -28,7 +26,7 @@ export function fetchChildrenInterestData(fromData) {
       //   const platform = "web";
       const payload = {
         ...fromData,
-        // childrenId: "678a1a3e5637f5882d98b2af",
+        childrenId,
         platform: "web",
       };
       // fromData = { ...fromData, "childrenId": "672df6b26045c53f2271c587", platform: platform }
@@ -105,6 +103,11 @@ export function getAllChildren() {
       }
 
       dispatch(getChildren(response?.data?.data));
+
+      for (let i = 0; i < response.data.data.length; i++) {
+        const element = response.data.data[i];
+        dispatch(getInterestDataForChild(element._id));
+      }
     } catch (error) {
       toast.error(
         error.message || "Failed to fetch children. Please try again."
@@ -122,31 +125,24 @@ export function getInterestDataForChild(childrenId) {
     dispatch(setLoading(true));
 
     try {
-      // Call the API to retrieve interest data
       const response = await apiConnector(
         "GET",
         `${FETCH_CHILDREN_INTEREST_DATA}?childrenId=${childrenId}`
       );
 
-      console.log("GET_INTEREST_DATA_FOR_CHILD API RESPONSE:", response);
-
       if (!response.data.success) {
-        throw new Error(response.data.message); // Handle unsuccessful response
+        throw new Error(response.data.message);
       }
 
-      // Dispatch an action to update Redux state with interest data (optional)
-      // Example:
-      dispatch(setInterestData(response.data.data));
+      const newInterestData = { childId: childrenId, ...response.data.data };
+      dispatch(setInterestData(newInterestData));
 
       toast.success("Interest data retrieved successfully!");
-      return response.data.data; // Return the data for local usage if needed
     } catch (error) {
-      console.error("GET_INTEREST_DATA_FOR_CHILD API ERROR:", error);
       toast.error(
         error.message || "Failed to fetch interest data. Please try again."
       );
     } finally {
-      // Dismiss the toast and update the loading state
       toast.dismiss(toastId);
       dispatch(setLoading(false));
     }

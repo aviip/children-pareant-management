@@ -12,6 +12,9 @@ const {
   createActivities,
   updateActivity,
   GetAllChildrenData,
+  GetUsageReport,
+  UpdateContinuousUsageLimit,
+  RecordUsageData,
 } = require("../controllers/parent");
 const { isParent } = require("../middleware/auth");
 
@@ -24,6 +27,9 @@ const endpoints = {
   SCHEDULE_ACTIVITY: "/schedule/activity",
   UPDATE_ACTIVITY: "/update/activity/:activityId",
   GET_CHILDREN: "/child/get/children",
+  GET_USAGE_REPORT: "/mobile-usage/report",
+  UPDATE_USAGE_LIMIT: "/mobile-usage/limit",
+  RECORD_USAGE: "/mobile-usage/record",
 };
 
 const JoinUnderMeSchema = Joi.object({
@@ -61,6 +67,31 @@ const validateJoinUnderMe = (req, res, next) => {
   next();
 };
 
+const UsageLimitSchema = Joi.object({
+  childId: Joi.string().required().messages({
+    "any.required": "Child ID is required",
+  }),
+  limit: Joi.string()
+    .pattern(/^\d+\s+(minutes?|hours?)$/)
+    .required()
+    .messages({
+      "any.required": "Usage limit is required",
+      "string.pattern.base":
+        'Limit must be in format like "60 minutes" or "2 hours"',
+    }),
+});
+const validateUsageLimit = (req, res, next) => {
+  const { error } = UsageLimitSchema.validate(req.body, { abortEarly: false });
+  if (error) {
+    const errorMessages = error.details.map((err) => err.message);
+    return res.status(400).json({
+      success: false,
+      errors: errorMessages,
+    });
+  }
+  next();
+};
+
 /*
 url : localhost:4000/api/v1/parent/add-child
  */
@@ -92,6 +123,20 @@ router.get(endpoints.GET_CHILD_INTEREST, isParent, GetInterestDataForChild);
 
 // url : localhost:4000/api/v1/parent/child/get/children
 router.get(endpoints.GET_CHILDREN, isParent, GetAllChildrenData);
+
+// url : localhost:4000/api/v1/parent/mobile-usage/report
+router.get(endpoints.GET_USAGE_REPORT, isParent, GetUsageReport);
+
+// url : localhost:4000/api/v1/parent/mobile-usage/limit
+router.put(
+  endpoints.UPDATE_USAGE_LIMIT,
+  isParent,
+  validateUsageLimit,
+  UpdateContinuousUsageLimit
+);
+
+// url : localhost:4000/api/v1/parent/mobile-usage/record
+router.post(endpoints.RECORD_USAGE, isParent, RecordUsageData);
 
 /*
 used for the creation of the activities for children - Done

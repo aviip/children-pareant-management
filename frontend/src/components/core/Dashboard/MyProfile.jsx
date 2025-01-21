@@ -3,15 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import parentImage from "../../../assets/Images/profile.jpg";
 import IconBtn from "../../Common/IconBtn";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   addChildUnderMe,
   getAllChildren,
 } from "../../../services/oparations/InterestFormAPI";
 
 export default function ParentProfile() {
-  const { user, children: childrenData } = useSelector((state) => state.profile);
-  const [children, setChildren] = useState(childrenData || []);
+  const { user, children } = useSelector((state) => state.profile);
   const [newChild, setNewChild] = useState({ name: "", age: "" });
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -36,11 +35,11 @@ export default function ParentProfile() {
     }
   };
 
-  // useEffect(() => {
-  //   if (childrenData?.length === 0) {
-  //     dispatch(getAllChildren());
-  //   }
-  // }, [childrenData, dispatch]);
+  useEffect(() => {
+    if (children?.length === 0) {
+      dispatch(getAllChildren());
+    }
+  }, []);
 
   const viewInterest = (data) => {
     navigate(`/dashboard/interest-form/${data._id}`);
