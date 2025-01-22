@@ -4,15 +4,17 @@ import {
   getAllChildren,
 } from "../../../services/oparations/InterestFormAPI";
 import { useDispatch, useSelector } from "react-redux";
-import { setInterestData } from "../../../slices/profileSlice";
+import { currentChild, setInterestData } from "../../../slices/profileSlice";
+import { useParams } from "react-router-dom";
 
 function InterestForm() {
   const dispatch = useDispatch();
-  const { children, currentlySelectedChild, interestData } = useSelector(
+  const { children, interestData, currentChildData } = useSelector(
     (state) => state.profile
   );
   const [selectedChildId, setSelectedChildId] = useState("");
 
+  const pathname = useParams();
   const [formData, setFormData] = useState({
     personalityTraits: "",
     hobbies: "",
@@ -35,7 +37,10 @@ function InterestForm() {
   const handleSave = async (e) => {
     e.preventDefault();
     dispatch(fetchChildrenInterestData(formData, selectedChildId));
-    const newInterestData = { childId: selectedChildId, ...formData };
+    const newInterestData = {
+      childId: selectedChildId,
+      ...formData,
+    };
     dispatch(setInterestData(newInterestData));
     alert("Form data has been saved successfully!");
   };
@@ -46,16 +51,18 @@ function InterestForm() {
     }
   }, [dispatch, children.length]);
 
-  // ------------ THIS NEEDS TO BE FIXED ------------
+  useEffect(() => {
+    const correctChildId = pathname.childId
+      ? pathname.childId
+      : interestData[0]?.childId;
 
-  // useEffect(() => {
-  //   if (children.length > 0) {
-  //     setSelectedChildId(interestData[0]?.childId);
-  //     setFormData(interestData[0] || formData);
-  //   }
-  // }, [selectedChildId, children.length]);
+    if (children.length > 0) {
+      setSelectedChildId(correctChildId);
+      setFormData(interestData[0] || formData);
 
-  // ------------ ------------
+      dispatch(currentChild(correctChildId));
+    }
+  }, [children.length, interestData]);
 
   const handleChildChange = (e) => {
     const selectedId = e.target.value;
@@ -63,6 +70,7 @@ function InterestForm() {
     const selectedChild = interestData.find(
       (child) => child.childId === selectedId
     );
+    dispatch(currentChild(selectedId));
     setFormData(selectedChild);
   };
 
@@ -70,7 +78,7 @@ function InterestForm() {
     <div className="p-5 rounded-lg shadow-lg w-full max-w-3xl mx-auto mt-4">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-richblue-800 text-3xl font-bold">
-          Interest Form for {currentlySelectedChild?.firstName || "Child"}
+          Interest Form for {currentChildData?.firstName || "Child"}
         </h2>
         <select
           className="p-2 rounded-md bg-blu text-white font-medium"

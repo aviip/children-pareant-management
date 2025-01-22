@@ -5,6 +5,7 @@ const initialState = {
   children: [],
   loading: false,
   interestData: [],
+  currentChildData: null,
 };
 
 const profileSlice = createSlice({
@@ -34,10 +35,22 @@ const profileSlice = createSlice({
     getChildren(state, action) {
       state.children = action.payload;
     },
+    currentChild(state, action) {
+      const [filteredData] = state.children.filter(
+        (child) => child._id === action.payload
+      );
+      state.currentChild = filteredData;
+    },
   },
 });
 
-export const { setUser, setLoading, addChild, setInterestData, getChildren } =
-  profileSlice.actions;
+export const {
+  setUser,
+  setLoading,
+  addChild,
+  setInterestData,
+  getChildren,
+  currentChild,
+} = profileSlice.actions;
 
 export default profileSlice.reducer;
